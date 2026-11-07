@@ -24,9 +24,15 @@ from .store import InMemoryStore
 POLICY_VERSION = os.environ.get("LOGOSECO_POLICY_VERSION", "v1")
 APPROVER_TOKEN = os.environ.get("LOGOSECO_APPROVER_TOKEN", "")
 
+def _key_bytes(raw):
+    import base64
+    raw=raw.strip()
+    return raw.encode("utf-8") if "BEGIN" in raw else base64.b64decode(raw)
+
+
 _pem = os.environ.get("LOGOSECO_PRIVATE_KEY_PEM", "")
 if _pem:
-    APPROVER = Approver.from_pem(_pem.encode("utf-8"), POLICY_VERSION)
+    APPROVER = Approver.from_pem(_key_bytes(_pem), POLICY_VERSION)
     _EPHEMERAL = False
 else:
     APPROVER = Approver.generate(POLICY_VERSION)  # dev only — key is lost on restart
